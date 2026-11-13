@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Eight-predictor MOGAD diagnostic calculator for patients with low-positive MOG-IgG results." data-i18n-attr="content:description">
+  <title data-i18n="title">MOGAD Diagnostic Calculator for Low-Positive MOG-IgG Results</title>
+  <style>
+    :root {
+      --navy: #163962; --blue: #215992; --ink: #121416;
+      --muted: #414950; --line: #d8e3ec; --light: #edf6ff; --paper: #fff;
+      --background: #f7faff; --mint: #e9f6ef; --green: #21654f;
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      color: var(--ink); background: var(--background);
+    }
+    :root[lang="zh-CN"] { font-family: "Microsoft YaHei UI", "PingFang SC", "Noto Sans CJK SC", "Segoe UI", sans-serif; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-size: 16px; line-height: 1.5; }
+    [hidden] { display: none !important; }
+    .shell { width: min(1160px, calc(100% - 64px)); margin-inline: auto; }
+    .skip { position: absolute; left: 1rem; top: -6rem; z-index: 5; padding: .7rem 1rem; background: white; }
+    .skip:focus { top: .5rem; }
+    :focus-visible { outline: 3px solid #3979b7; outline-offset: 3px; }
+    a { color: var(--blue); text-underline-offset: .2em; }
+    .masthead { background: var(--paper); border-bottom: 1px solid var(--line); }
+    .masthead-inner { display: flex; justify-content: space-between; align-items: center; min-height: 62px; gap: 24px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-weight: 700; }
+    .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #b9cfe4; border-radius: 8px; background: var(--light); color: var(--blue); font-size: 20px; line-height: 1; }
+    nav { display: flex; gap: clamp(12px, 3vw, 30px); }
+    nav a { color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 650; white-space: nowrap; }
+    nav a:hover { text-decoration: underline; }
+    .masthead-actions { display: flex; align-items: center; gap: 22px; }
+    .language { display: inline-flex; gap: 2px; padding: 3px; background: #f5f8fc; border: 1px solid #d6e1ec; border-radius: 8px; }
+    .language button { border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--ink); padding: 5px 8px; font: inherit; font-size: 13px; font-weight: 650; cursor: pointer; }
+    .language button:hover { background: var(--light); }
+    .language button[aria-pressed="true"] { background: #d7eaff; border-color: #6d9bc9; }
+    .hero { color: #fff; background: linear-gradient(114deg, #112b4c 18%, #183b63 76%, #234f7e); border-bottom: 1px solid #305578; }
+    .hero-inner { padding-block: 34px 38px; }
+    .hero h1 { margin: 0; font-family: "Segoe UI", "Microsoft YaHei UI", "PingFang SC", sans-serif; font-weight: 700; font-size: clamp(28px, 3.6vw, 49px); line-height: 1.2; text-wrap: balance; }
+    .hero p { margin: 11px 0 0; max-width: 720px; color: #e0ebf7; }
+    main { padding-block: 26px 38px; }
+    section { scroll-margin-top: 18px; }
+    .calculator { display: grid; grid-template-columns: minmax(0, 1.42fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+    .card { background: var(--paper); border: 1px solid var(--line); border-radius: 15px; box-shadow: 0 6px 20px #112a4610; }
+    .card-head { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 22px 24px 17px; border-bottom: 1px solid var(--line); }
+    h2, h3, p { margin-top: 0; }
+    h2 { margin-bottom: 0; font-size: 23px; line-height: 1.25; letter-spacing: -.025em; }
+    h3 { margin-bottom: .35rem; font-size: 16px; }
+    .instruction { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
+    .reset { flex: none; border: 1px solid #bbccdd; background: white; color: var(--ink); border-radius: 8px; padding: 8px 12px; font: inherit; font-size: 13px; font-weight: 650; cursor: pointer; }
+    .reset:hover { background: var(--light); }
+    .predictors { margin: 0; padding: 2px 24px 12px; list-style: none; }
+    .predictors li + li { border-top: 1px solid #e7edf3; }
+    fieldset { min-width: 0; padding: 0; margin: 0; border: 0; }
+    legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .field { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; min-height: 53px; padding: 8px 0; }
+    .field-name { font-weight: 650; line-height: 1.35; }
+    .field-definition { margin-top: 3px; font-size: 13px; color: var(--muted); }
+    .field-definition summary { display: list-item; width: fit-content; padding: 2px 0; color: var(--blue); font-size: 13px; font-weight: 650; }
+    .field-definition p { margin: 4px 0 2px; line-height: 1.45; }
+    .choices { display: inline-flex; gap: 3px; padding: 3px; border-radius: 8px; border: 1px solid #d6e1ec; background: #f5f8fc; white-space: nowrap; }
+    .choices label { position: relative; cursor: pointer; }
+    .choices input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .choices span { display: block; border-radius: 5px; min-width: 48px; text-align: center; padding: 7px 9px; font-size: 14px; line-height: 1.25; font-weight: 600; }
+    .choices label:hover span { background: #e5edf6; }
+    .choices input:checked + span { background: #d7eaff; box-shadow: inset 0 0 0 1px #6d9bc9; font-weight: 700; }
+    .choices input:focus-visible + span { outline: 2px solid #3979b7; outline-offset: 2px; }
+    .result { overflow: hidden; border-top: 4px solid #73a6da; }
+    .result-main { padding: 23px 25px 20px; }
+    .readout { display: flex; align-items: baseline; gap: 7px; min-height: 90px; margin-top: 8px; font-size: clamp(53px, 6.6vw, 84px); font-weight: 750; line-height: 1.1; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
+    .readout[data-empty="true"] { color: #576575; }
+    .readout small { font-size: .44em; letter-spacing: 0; }
+    .status { margin: 0; min-height: 45px; display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 8px; background: var(--light); font-size: 14px; font-weight: 650; }
+    .status::before { content: ""; flex: 0 0 8px; width: 8px; height: 8px; border-radius: 50%; background: #52799e; }
+    .status[data-state="positive"] { background: var(--mint); }
+    .status[data-state="positive"]::before { background: var(--green); }
+    .scale { margin-top: 23px; }
+    .track { position: relative; height: 8px; margin-top: 12px; border-radius: 20px; background: linear-gradient(to right, #e1e9f2 0 var(--threshold), #b6cee6 var(--threshold) 100%); }
+    .cut { position: absolute; top: -4px; bottom: -4px; left: var(--threshold); width: 2px; transform: translateX(-50%); background: #41698f; }
+    .marker { position: absolute; top: 50%; left: var(--probability); transform: translate(-50%, -50%); width: 13px; height: 13px; border: 2px solid white; border-radius: 50%; background: var(--navy); box-shadow: 0 0 0 1px var(--navy); }
+    .axis { display: flex; justify-content: space-between; margin-top: 8px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .threshold-key { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+    @media (max-width: 465px) {
+      .masthead-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 0; padding-block: 9px; }
+      .masthead-actions { display: contents; }
+      .masthead nav { grid-row: 2; grid-column: 1 / -1; margin-top: 8px; }
+      .language { grid-column: 2; grid-row: 1; }
+    }
+    .threshold-key strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+    .scope { margin: 0; padding: 14px 25px 16px; background: #f5f8fc; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .evidence { margin-top: 22px; padding: 22px 24px 21px; }
+    .reference-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 14px; }
+    .reference { padding: 14px 16px; border: 1px solid var(--line); border-radius: 9px; background: #f6faff; }
+    .reference p { margin: 0 0 8px; font-size: 14px; color: var(--muted); }
+    .reference-links { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; font-weight: 650; }
+    .methods { margin-top: 17px; padding: 0 24px; }
+    summary { cursor: pointer; font-size: 15px; font-weight: 650; padding-block: 13px; }
+    .method-body { border-top: 1px solid var(--line); padding-block: 12px 16px; color: var(--muted); font-size: 13px; }
+    .method-body p { margin: 0 0 9px; }
+    .method-body p:last-child { margin: 0; }
+    footer { border-top: 1px solid var(--line); padding-block: 17px 24px; color: var(--muted); font-size: 12px; }
+    @media (min-width: 890px) { .result { position: sticky; top: 18px; } }
+    @media (max-width: 889px) { .calculator { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) {
+      .shell { width: calc(100% - 28px); }
+      .masthead-inner { min-height: 56px; gap: 10px; }
+      .brand { font-size: 13px; gap: 7px; }
+      .brand-mark { width: 24px; height: 24px; font-size: 16px; }
+      nav a { font-size: 12px; }
+      .hero-inner { padding-block: 30px 32px; }
+      .hero p { font-size: 14px; }
+      main { padding-block: 16px 26px; }
+      .calculator { gap: 14px; }
+      .card-head, .result-main, .evidence { padding-inline: 14px; }
+      .predictors, .scope, .methods { padding-inline: 14px; }
+      .field { gap: 8px; }
+      .field-name { font-size: 13px; }
+      .choices span { padding: 8px 6px; min-width: 36px; font-size: 13px; }
+      .choices-three .field { grid-template-columns: 1fr; }
+      .choices-three .choices { justify-self: start; }
+      .readout { min-height: 68px; }
+      .evidence { margin-top: 14px; }
+      .reference-grid { grid-template-columns: 1fr; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#calculator" data-i18n="skip">Skip to calculator</a>
+  <header>
+    <div class="masthead">
+      <div class="shell masthead-inner">
+        <a class="brand" href="#calculator"><span class="brand-mark" aria-hidden="true">+</span><span data-i18n="brand">MOGAD Calculator</span></a>
+        <div class="masthead-actions">
+          <nav aria-label="Page navigation" data-i18n-attr="aria-label:sections"><a href="#calculator" data-i18n="calculator">Calculator</a><a href="#clinical-context" data-i18n="evidenceNav">Clinical Evidence</a></nav>
+          <div class="language" role="group" aria-label="Interface language" data-i18n-attr="aria-label:language" hidden>
+            <button type="button" data-language="en" lang="en" aria-pressed="true">English</button>
+            <button type="button" data-language="zh-CN" lang="zh-CN" aria-pressed="false">中文</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero">
+      <div class="shell hero-inner">
+        <h1 data-i18n="title">MOGAD Diagnostic Calculator for Low-Positive MOG-IgG Results</h1>
+        <p data-i18n="hero">Estimate the probability of myelin oligodendrocyte glycoprotein antibody-associated disease (MOGAD) in patients with low-positive MOG-IgG results using eight clinical, laboratory, and MRI predictors.</p>
+      </div>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="calculator" id="calculator" aria-label="MOGAD diagnostic calculator" data-i18n-attr="aria-label:calcLabel">
+      <form class="card" id="predictor-form" autocomplete="off" aria-labelledby="predictor-title">
+        <div class="card-head">
+          <div><h2 id="predictor-title" data-i18n="predictors">Predictors</h2><p class="instruction" data-i18n="instructions">Select one option for each predictor. Leave unknown findings blank.</p></div>
+          <button type="reset" class="reset" data-i18n="reset">Reset</button>
+        </div>
+        <ol class="predictors" id="predictors"></ol>
+        <noscript><p class="scope" data-i18n="javascript">Enable JavaScript to use the calculator.</p></noscript>
+      </form>
+      <section class="card result" aria-labelledby="result-title">
+        <div class="result-main">
+          <h2 id="result-title" data-i18n="result">MOGAD predicted probability</h2>
+          <div role="status" aria-live="polite" aria-atomic="true">
+            <div class="readout" id="readout" data-empty="true"><span id="probability">—</span><small id="percent-sign" hidden>%</small></div>
+            <p class="status" id="result-status">Select all 8 predictors to see a result</p>
+          </div>
+          <div class="scale" aria-hidden="true">
+            <div class="track" id="track"><span class="cut"></span><span class="marker" id="marker" hidden></span></div>
+            <div class="axis"><span>0%</span><span>100%</span></div>
+          </div>
+          <p class="threshold-key"><span data-i18n="threshold">Fixed classification threshold</span> <strong id="threshold">37.7602%</strong></p>
+        </div>
+        <p class="scope"><span data-i18n="scope">For research use. Interpret the model estimate alongside the clinical presentation and laboratory report.</span> <a href="https://pubmed.ncbi.nlm.nih.gov/36706773/" target="_blank" rel="noopener noreferrer" data-i18n="criteria">2023 international MOGAD diagnostic criteria</a></p>
+      </section>
+    </section>
+
+    <details class="card methods">
+      <summary data-i18n="methods">Model and Validation Methods</summary>
+      <div class="method-body">
+        <p data-i18n="fit">The multivariable logistic regression model was fitted in the derivation cohort using eight categorical predictors and MOGAD diagnosis as the outcome. The probability threshold was selected by maximizing the Youden index. A prediction at or above the threshold is model-positive.</p>
+        <p data-i18n="validation">Internal and external validation used the derivation coefficients and the unrounded probability threshold. The model includes repeat serology among its predictors. Complete all eight entries when the required findings are available.</p>
+        <p><span data-i18n="codingBefore">Validation retained the original cohort coding. Among records with source variable </span><code>Clinical_phenotype1</code><span data-i18n="codingAfter"> coded as 0, optic neuritis laterality was coded as 1 for 0 of 187 in derivation, 93 of 94 in internal validation, and 66 of 67 in external validation.</span></p>
+        <p data-i18n="abbreviations">OCB denotes oligoclonal bands. FCBA denotes fixed cell-based assay. The 1:32 cut point defines the titer predictor in this model. Use the laboratory’s assay-specific criteria to determine low-positive status.</p>
+      </div>
+    </details>
+
+    <section class="card evidence" id="clinical-context" aria-labelledby="evidence-title">
+      <h2 id="evidence-title" data-i18n="evidence">Clinical context and evidence</h2>
+      <div class="reference-grid">
+        <article class="reference">
+          <h3 data-i18n="lowTitle">Low-Positive MOG-IgG</h3>
+          <p data-i18n="lowBody">Use the reporting laboratory’s assay-specific interpretation. For low-positive serum MOG-IgG results, the 2023 criteria require a compatible core clinical demyelinating event, at least one supporting clinical or MRI feature, negative aquaporin-4 IgG (AQP4-IgG), and exclusion of a better diagnosis.</p>
+          <div class="reference-links">
+            <a href="https://pubmed.ncbi.nlm.nih.gov/36706773/" target="_blank" rel="noopener noreferrer" data-i18n="criteriaLink">Banwell et al. · Diagnostic criteria</a>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/33900394/" target="_blank" rel="noopener noreferrer" data-i18n="titerLink">Sechi et al. · Titer and positive predictive value</a>
+          </div>
+        </article>
+        <article class="reference">
+          <h3 data-i18n="trueTitle">TRUE-MOGAD Score</h3>
+          <p data-i18n="trueBody">Vilaseca et al. developed a separate point-based score in a cohort that included both low-positive and clear-positive MOG-IgG results. The published classification threshold for the TRUE-MOGAD score is ≥2 points.</p>
+          <div class="reference-links">
+            <a href="https://pubmed.ncbi.nlm.nih.gov/41921125/" target="_blank" rel="noopener noreferrer" data-i18n="paperLink">Vilaseca et al. · PubMed</a>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/42441932/" target="_blank" rel="noopener noreferrer" data-i18n="correction">Published correction</a>
+            <a href="https://news.mayocliniclabs.com/true-mogad-calculator/" target="_blank" rel="noopener noreferrer" data-i18n="mayo">Mayo Clinic Laboratories calculator</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer><div class="shell" data-i18n="footer">All calculations run locally in your browser.</div></footer>
+  <script>
+    "use strict";
+    const threshold = 0.3776021778925461;
+    const intercept = -2.3750415878423694;
+    const binary = ["No", "Yes"];
+    const predictors = [
+      { key: "Repeat_MOG_status", label: "Lasting MOG-IgG positivity (L)", levels: binary, beta: [0, 2.2300184177260705] },
+      { key: "Clinical_phenotype1_2", label: "Optic neuritis and/or myelitis phenotype (O)", levels: binary, beta: [0, 0.40739157098997725] },
+      { key: "Epilepsy_MRI_2", label: "Warning features with normal brain MRI or limbic involvement (W)", levels: binary, beta: [0, -1.1852487665462739] },
+      { key: "MRI", label: "MRI supportive features (M)", levels: binary, beta: [0, 1.5836934438275596] },
+      { key: "OPVL_ob", label: "Oligoclonal bands with ovoid periventricular lesions (O)", levels: binary, beta: [0, -1.635415733499667] },
+      { key: "Progression_acute_c", label: "Gradual progression or abrupt onset (G)", levels: binary, beta: [0, -2.9292837370417133] },
+      { key: "FCBA_c", label: "Antibody titer ≥1:32 by FCBA (A)", levels: binary, beta: [0, 0.6124473402415052] },
+      { key: "ON_laterality", label: "Bilateral, unilateral, or no optic neuritis (b)", levels: ["Absent", "Unilateral", "Bilateral"], beta: [0, -0.23494470207231646, 1.4861881197964506] },
+    ];
+    const predictorDefinitions = {
+      "Repeat_MOG_status": "MOG-IgG remains positive on repeat testing during follow-up.",
+      "Clinical_phenotype1_2": "Presence of an optic neuritis phenotype, a myelitis phenotype, or both.",
+      "Epilepsy_MRI_2": "At least one of seizures, fever, or headache, together with either a normal brain MRI or limbic involvement on brain MRI.",
+      "MRI": "Presence of supportive MRI features specified in the 2023 International MOGAD Panel diagnostic criteria.",
+      "OPVL_ob": "Oligoclonal band positivity together with ovoid periventricular lesions on brain MRI.",
+      "Progression_acute_c": "A gradually progressive clinical course or abrupt symptom onset, as defined in the study.",
+      "FCBA_c": "MOG-IgG titer of 1:32 or higher measured by a fixed cell-based assay (FCBA).",
+      "ON_laterality": "Optic neuritis laterality classified as bilateral, unilateral, or absent."
+    };
+
+    const chineseText = {
+      "definition": "定义",
+      "skip": "跳转至计算器",
+      "brand": "MOGAD 计算器",
+      "sections": "页面导航",
+      "calculator": "计算器",
+      "evidenceNav": "临床证据",
+      "language": "界面语言",
+      "title": "MOG-IgG 低滴度阳性患者的 MOGAD 诊断计算器",
+      "description": "适用于 MOG-IgG 低滴度阳性患者的八变量 MOGAD 诊断计算器。",
+      "hero": "基于 8 项临床、实验室和磁共振成像（MRI）预测变量，估计 MOG-IgG 低滴度阳性患者罹患髓鞘少突胶质细胞糖蛋白抗体相关疾病（MOGAD）的概率。",
+      "calcLabel": "MOGAD 诊断计算器",
+      "predictors": "预测变量",
+      "instructions": "为每项预测变量选择一个选项。资料不详时，请留空。",
+      "reset": "重置",
+      "javascript": "请启用 JavaScript 以使用计算器。",
+      "result": "MOGAD 预测概率",
+      "pending": "请选择全部 8 项预测变量以查看结果",
+      "threshold": "固定分类阈值",
+      "scope": "供研究使用。请结合临床表现及实验室检测报告解读模型结果。",
+      "criteria": "2023 年国际 MOGAD 诊断标准",
+      "evidence": "临床背景与证据",
+      "lowTitle": "MOG-IgG 低滴度阳性",
+      "lowBody": "请依据出具报告的实验室针对该检测方法的标准判读。血清 MOG-IgG 低滴度阳性时，2023 年诊断标准要求存在相符的核心临床脱髓鞘事件、至少一项支持性临床或 MRI 特征，且水通道蛋白 4 抗体（AQP4-IgG）阴性，并排除更合理的诊断。",
+      "criteriaLink": "Banwell 等 · 诊断标准",
+      "titerLink": "Sechi 等 · 滴度与阳性预测值",
+      "trueTitle": "TRUE-MOGAD 评分",
+      "trueBody": "Vilaseca 等在包含 MOG-IgG 低滴度阳性和明确阳性患者的队列中建立了独立的积分模型。原研究报告的 ≥2 分是 TRUE-MOGAD 评分的分类阈值。",
+      "paperLink": "Vilaseca 等 · PubMed",
+      "correction": "期刊勘误",
+      "mayo": "Mayo Clinic Laboratories 在线计算器",
+      "methods": "模型及验证方法",
+      "fit": "采用发现队列拟合多因素 Logistic 回归模型，纳入 8 项分类预测变量，以 MOGAD 诊断为结局事件。通过最大化约登指数确定概率阈值。预测概率达到或超过该阈值时，模型判为阳性。",
+      "validation": "内部和外部验证均使用发现队列估计的回归系数及未舍入的概率阈值。复查血清学结果是本模型的预测变量之一。请在所需资料齐全时完成全部 8 项选择。",
+      "codingBefore": "验证沿用各队列的原始编码。在原始变量 ",
+      "codingAfter": " 编码为 0 的病例中，视神经炎侧别编码为 1 的例数分别为发现队列 0/187、内部验证队列 93/94、外部验证队列 66/67。",
+      "abbreviations": "OCB 为寡克隆区带。FCBA 为固定细胞法。1:32 是本模型中滴度预测变量的分界值。低滴度阳性应依据实验室针对该检测方法的标准判定。",
+      "footer": "所有计算均在您的浏览器本地完成。"
+    };
+    const chinesePredictors = {
+      "Repeat_MOG_status": [
+        "MOG-IgG 持续阳性（L）",
+        "随访期间复查 MOG-IgG 仍呈阳性。"
+      ],
+      "Clinical_phenotype1_2": [
+        "视神经炎和／或脊髓炎表型（O）",
+        "具有视神经炎表型、脊髓炎表型，或两者兼有。"
+      ],
+      "Epilepsy_MRI_2": [
+        "警示特征伴脑 MRI 正常或边缘系统受累（W）",
+        "癫痫发作、发热或头痛至少一项，同时脑 MRI 正常或显示边缘系统受累。"
+      ],
+      "MRI": [
+        "MRI 支持性特征（M）",
+        "存在 2023 年国际 MOGAD 专家组诊断标准所规定的支持性 MRI 特征。"
+      ],
+      "OPVL_ob": [
+        "寡克隆区带阳性伴脑室周围卵圆形病灶（O）",
+        "寡克隆区带阳性，且脑 MRI 显示脑室周围卵圆形病灶。"
+      ],
+      "Progression_acute_c": [
+        "缓慢进展或骤然起病（G）",
+        "依据本研究的定义，病程呈缓慢进展或症状骤然起病。"
+      ],
+      "FCBA_c": [
+        "固定细胞法测得抗体滴度 ≥1:32（A）",
+        "采用固定细胞法（FCBA）检测，MOG-IgG 滴度为 1:32 或以上。"
+      ],
+      "ON_laterality": [
+        "双侧、单侧或无视神经炎（b）",
+        "视神经炎侧别分为双侧、单侧或无视神经炎。"
+      ]
+    };
+    const chineseLevels = {
+      "No": "否",
+      "Yes": "是",
+      "Absent": "无视神经炎",
+      "Unilateral": "单侧",
+      "Bilateral": "双侧"
+    };
+    const statusMessages = {
+      en: {
+        empty: "Select all 8 predictors to see a result",
+        progress: count => `${count} of 8 predictors selected`,
+        positive: "Model-positive for MOGAD",
+        negative: "Model-negative for MOGAD",
+      },
+      "zh-CN": {
+        empty: "请选择全部 8 项预测变量以查看结果",
+        progress: count => `已选择 ${count}／8 项预测变量`,
+        positive: "MOGAD 模型判为阳性",
+        negative: "MOGAD 模型判为阴性",
+      },
+    };
+    let language = "en";
+    const predictorTranslations = [];
+
+    const form = document.getElementById("predictor-form");
+    const list = document.getElementById("predictors");
+    const readout = document.getElementById("readout");
+    const probabilityText = document.getElementById("probability");
+    const percentSign = document.getElementById("percent-sign");
+    const resultStatus = document.getElementById("result-status");
+    const track = document.getElementById("track");
+    const marker = document.getElementById("marker");
+    for (const { key, label, levels } of predictors) {
+      const row = document.createElement("li");
+      if (levels.length > 2) row.className = "choices-three";
+      const fieldset = document.createElement("fieldset");
+      const legend = document.createElement("legend");
+      legend.textContent = label;
+      const [chineseLabel, chineseDefinition] = chinesePredictors[key];
+      predictorTranslations.push([legend, label, chineseLabel]);
+      const field = document.createElement("div");
+      field.className = "field";
+      const name = document.createElement("span");
+      name.className = "field-name";
+      name.setAttribute("aria-hidden", "true");
+      name.textContent = label;
+      predictorTranslations.push([name, label, chineseLabel]);
+      const description = document.createElement("div");
+      description.append(name);
+      const definition = document.createElement("details");
+      definition.className = "field-definition";
+      const definitionLabel = document.createElement("summary");
+      definitionLabel.textContent = "Definition";
+      definitionLabel.dataset.i18n = "definition";
+      const definitionText = document.createElement("p");
+      definitionText.textContent = predictorDefinitions[key];
+      predictorTranslations.push([definitionText, predictorDefinitions[key], chineseDefinition]);
+      definition.append(definitionLabel, definitionText);
+      description.append(definition);
+      const choices = document.createElement("div");
+      choices.className = "choices";
+      for (const [code, level] of levels.entries()) {
+        const choice = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = key;
+        input.value = String(code);
+        const text = document.createElement("span");
+        text.textContent = level;
+        predictorTranslations.push([text, level, chineseLevels[level]]);
+        choice.append(input, text);
+        choices.append(choice);
+      }
+      field.append(description, choices);
+      fieldset.append(legend, field);
+      row.append(fieldset);
+      list.append(row);
+    }
+
+    function updateResult() {
+      const entries = new FormData(form);
+      const messages = statusMessages[language];
+      const selected = predictors.filter(({ key }) => entries.has(key)).length;
+      const complete = selected === predictors.length;
+      readout.dataset.empty = String(!complete);
+      percentSign.hidden = !complete;
+      marker.hidden = !complete;
+      if (!complete) {
+        probabilityText.textContent = "—";
+        resultStatus.dataset.state = "pending";
+        resultStatus.textContent = selected === 0 ? messages.empty : messages.progress(selected);
+        return;
+      }
+
+      const logit = predictors.reduce((sum, { key, beta }) => sum + beta[Number(entries.get(key))], intercept);
+      const probability = 1 / (1 + Math.exp(-logit));
+      const positive = probability >= threshold;
+      probabilityText.textContent = (100 * probability).toFixed(2);
+      marker.style.setProperty("--probability", `${100 * probability}%`);
+      resultStatus.dataset.state = positive ? "positive" : "negative";
+      resultStatus.textContent = positive ? messages.positive : messages.negative;
+    }
+
+    const translatedText = [...document.querySelectorAll("[data-i18n]")].map(node => [
+      node, node.textContent, chineseText[node.dataset.i18n],
+    ]);
+    const translatedAttributes = [...document.querySelectorAll("[data-i18n-attr]")].map(node => {
+      const [attribute, key] = node.dataset.i18nAttr.split(":");
+      return [node, attribute, node.getAttribute(attribute), chineseText[key]];
+    });
+    const textPairs = [...translatedText, ...predictorTranslations];
+    const languageControl = document.querySelector(".language");
+    const languageButtons = [...languageControl.querySelectorAll("button")];
+
+    function setLanguage(nextLanguage) {
+      language = nextLanguage;
+      document.documentElement.lang = nextLanguage;
+      const chinese = nextLanguage === "zh-CN";
+      for (const [node, englishText, chineseText] of textPairs) {
+        node.textContent = chinese ? chineseText : englishText;
+      }
+      for (const [node, attribute, englishValue, chineseValue] of translatedAttributes) {
+        node.setAttribute(attribute, chinese ? chineseValue : englishValue);
+      }
+      for (const button of languageButtons) {
+        button.setAttribute("aria-pressed", String(button.dataset.language === language));
+      }
+      updateResult();
+    }
+
+    for (const button of languageButtons) {
+      button.addEventListener("click", () => setLanguage(button.dataset.language));
+    }
+    languageControl.hidden = false;
+
+    track.style.setProperty("--threshold", `${100 * threshold}%`);
+    document.getElementById("threshold").textContent = `${(100 * threshold).toFixed(4)}%`;
+    form.addEventListener("change", updateResult);
+    form.addEventListener("reset", () => requestAnimationFrame(updateResult));
+    window.addEventListener("pageshow", updateResult);
+    updateResult();
+  </script>
+</body>
+</html>
